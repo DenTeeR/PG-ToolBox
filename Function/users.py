@@ -1,160 +1,96 @@
+"""Presentation and reports for PasarGuard's datetime and subscription models."""
+
+from collections import Counter
+from datetime import datetime, timezone
+from difflib import SequenceMatcher
+from html import escape
+from io import BytesIO
+
 from reportlab.lib.pagesizes import A4
-from reportlab.lib import colors
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
-from Function.db import *
-from datetime import datetime
-import requests , pytz , uuid
-from requests.packages.urllib3.exceptions import InsecureRequestWarning
-requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
-
-def DEF_PATCH_TO_SECEND(TIME) :
-    ONLINE_PATCH = "%Y-%m-%dT%H:%M:%S.%f" if '.' in TIME else "%Y-%m-%dT%H:%M:%S"
-    TIME = datetime.strptime(TIME , ONLINE_PATCH )
-    TIME_UTC = pytz.utc.localize(TIME)
-    TIME_LOCAL = TIME_UTC.astimezone(pytz.timezone('Asia/Tehran'))
-    TIME_NOW = datetime.now(pytz.timezone('Asia/Tehran'))
-    DELTA = TIME_NOW - TIME_LOCAL
-    return DELTA
-
-def DEF_ALL_USERS(CHATID) :
-    PANEL_USER, PANEL_PASS, PANEL_DOMAIN = DEF_IMPORT_DATA (CHATID)
-    PANEL_TOKEN = DEF_PANEL_ACCESS(PANEL_USER, PANEL_PASS, PANEL_DOMAIN)
-    URL = f"{PANEL_DOMAIN}/api/users"
-    RESPONCE = requests.get(url=URL, headers=PANEL_TOKEN , verify=False)
-    LEN_ALL_USERS = LEN_ALL_ACTIVE_USERS = LEN_ALL_DISABLED_USERS = LEN_ALL_EXPIRED_USERS = LEN_ALL_LIMITED_USERS = LEN_ALL_ON_HOLD_USERS = LEN_ALL_ONLINE_USERS = LEN_ALL_OFFLINE_USERS = LEN_ALL_IS_UPDATE_USERS = LEN_ALL_NOT_UPDATE_USERS = 0
-    if RESPONCE.status_code == 200 :
-        RESPONCE_DATA = RESPONCE.json()
-        for USER in RESPONCE_DATA["users"] :
-            LEN_ALL_USERS += 1
-            USER_STATUS = USER.get('status')
-            if USER_STATUS == "active" :
-                LEN_ALL_ACTIVE_USERS += 1
-            elif USER_STATUS == "disabled":
-                LEN_ALL_DISABLED_USERS += 1
-            elif USER_STATUS == "expired" :
-                LEN_ALL_EXPIRED_USERS += 1
-            elif USER_STATUS == "limited" :
-                LEN_ALL_LIMITED_USERS += 1
-            elif USER_STATUS == "on_hold" :
-                LEN_ALL_ON_HOLD_USERS += 1
-            USER_ONLINE_AT = USER.get('online_at')
-            if USER_ONLINE_AT :
-                DELTA = (DEF_PATCH_TO_SECEND(USER_ONLINE_AT)).total_seconds()
-                if int(DELTA) <= 86400 :
-                    LEN_ALL_ONLINE_USERS += 1 
-                else :
-                    LEN_ALL_OFFLINE_USERS += 1
-            USER_UPDATE_AT = USER.get('sub_updated_at')
-            if USER_UPDATE_AT :
-                DELTA = (DEF_PATCH_TO_SECEND(USER_UPDATE_AT)).total_seconds()
-                if int(DELTA) <= 86400 :
-                    LEN_ALL_IS_UPDATE_USERS += 1 
-                else :
-                    LEN_ALL_NOT_UPDATE_USERS += 1
-        TEXT = f"<b>👤 All users :</b> {LEN_ALL_USERS}\n<b>✅ Active users :</b> {LEN_ALL_ACTIVE_USERS}\n<b>❌ Disables users :</b> {LEN_ALL_DISABLED_USERS}\n<b>🕰 Expired users :</b> {LEN_ALL_EXPIRED_USERS}\n<b>🪫 Limited users :</b> {LEN_ALL_LIMITED_USERS}\n<b>🔌 On hold users :</b> {LEN_ALL_ON_HOLD_USERS}\n\n<b>👀 Online users (last 24h) :</b> {LEN_ALL_ONLINE_USERS}\n<b>⚰️ Offline users (more 24h) :</b> {LEN_ALL_OFFLINE_USERS}\n\n<b>📡 Updated users (last 24h) :</b> {LEN_ALL_IS_UPDATE_USERS}\n<b>⚰️ Not Update users (more 24h) :</b> {LEN_ALL_NOT_UPDATE_USERS}"
-    else :
-        TEXT = f"<b>❌ I can't check users.</b>\n<pre>{str(RESPONCE.text)}</pre>"
-    return TEXT
 
 
-def DEF_USERS_LIST_STATUS(MESSAGE_TEXT , CHATID) :
-    USERS_LIST = {
-        "✅ Active": "active",
-        "❌ Disabled": "disabled",
-        "🕰 Expired": "expired",
-        "🪫 Limited": "limited",
-        "🔌 On Hold": "on_hold"
-    }    
-    USERS_LIST_RESUTL = USERS_LIST.get(MESSAGE_TEXT)
-    PANEL_USER, PANEL_PASS, PANEL_DOMAIN = DEF_IMPORT_DATA (CHATID)
-    PANEL_TOKEN = DEF_PANEL_ACCESS(PANEL_USER, PANEL_PASS, PANEL_DOMAIN)
-    URL = f"{PANEL_DOMAIN}/api/users"
-    RESPONCE = requests.get(url=URL, headers=PANEL_TOKEN , verify=False)
-    if RESPONCE.status_code == 200:
-        RESPONCE_DATA = RESPONCE.json()
-        LIST = []
-        for USER in RESPONCE_DATA["users"] :
-            USER_STATUS = USER.get('status')
-            if USER_STATUS == USERS_LIST_RESUTL :
-                USER_USERNAME = USER.get('username')
-                LIST.append(USER_USERNAME)
-        LIST.sort()
-    else :
-        LIST = []
-    return LIST
-
-def DEF_CREATE_PDF(user_list):
-    pdf_name = str(uuid.uuid4()) + ".pdf"
-    pdf = SimpleDocTemplate(pdf_name, pagesize=A4, leftMargin=50, rightMargin=50, topMargin=50, bottomMargin=50)
-    data = [user_list[i:i+3] for i in range(0, len(user_list), 3)]
-    table = Table(data, colWidths=[160] * 3)
-    style = TableStyle([('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-                        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-                        ('INNERGRID', (0, 0), (-1, -1), 0.25, colors.black),
-                        ('BOX', (0, 0), (-1, -1), 0.25, colors.black)])
-    table.setStyle(style)
-    pdf.build([table])
-    return pdf_name
-
-def DEF_CONVERT_TO_SECEND(MESSAGE_TEXT):
-    TIME, UNIT = MESSAGE_TEXT.split()
-    TIME = int(TIME)
-    if UNIT == 'min':
-        return TIME * 60
-    elif UNIT == 'hour':
-        return TIME * 3600
-    elif UNIT == 'day':
-        return TIME * 86400
-    else:
+def utc_datetime(value):
+    if value is None or value == 0:
         return None
-    
-def DEF_USERS_TIME_LIST (CHATID , CATAGORY , TIME) :
-    PANEL_USER, PANEL_PASS, PANEL_DOMAIN = DEF_IMPORT_DATA (CHATID)
-    PANEL_TOKEN = DEF_PANEL_ACCESS(PANEL_USER, PANEL_PASS, PANEL_DOMAIN)
-    URL = f"{PANEL_DOMAIN}/api/users"
-    RESPONCE = requests.get(url=URL, headers=PANEL_TOKEN , verify=False)
-    if RESPONCE.status_code == 200:
-        RESPONCE_DATA = RESPONCE.json()
-        USERS_LIST = []
-        NOT_USER_LIST = []
-        for USER in RESPONCE_DATA["users"] :
-            USER_TIME = USER.get(CATAGORY)
-            if USER_TIME :
-                DELTA = (DEF_PATCH_TO_SECEND(USER_TIME)).total_seconds()
-                USER_USERNAME = USER.get('username')
-                if int(DELTA) <= int(TIME) :
-                    USERS_LIST.append(USER_USERNAME)
-                else :
-                    NOT_USER_LIST.append(USER_USERNAME)
-        USERS_LIST.sort()
-        NOT_USER_LIST.sort()
-    else :
-        USERS_LIST = []
-        NOT_USER_LIST = []
-    return USERS_LIST , NOT_USER_LIST
+    if isinstance(value, (int, float)):
+        return datetime.fromtimestamp(value, timezone.utc)
+    result = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    if result.tzinfo is None:
+        result = result.replace(tzinfo=timezone.utc)
+    return result.astimezone(timezone.utc)
 
 
-def DEF_GET_CLIENTS(CHATID) :
-    PANEL_USER, PANEL_PASS, PANEL_DOMAIN = DEF_IMPORT_DATA (CHATID)
-    PANEL_TOKEN = DEF_PANEL_ACCESS(PANEL_USER, PANEL_PASS, PANEL_DOMAIN)
-    URL = f"{PANEL_DOMAIN}/api/users"
-    RESPONCE = requests.get(url=URL, headers=PANEL_TOKEN , verify=False)
-    if RESPONCE.status_code == 200:
-        RESPONCE_DATA = RESPONCE.json()
-        USERS_LIST = {}
-        USERS_LIST["NO Data"] = 0
-        for USER in RESPONCE_DATA["users"] :
-            USER_CLIENTS = USER.get("sub_last_user_agent")
-            if USER_CLIENTS :
-                if USER_CLIENTS in USERS_LIST :
-                    USERS_LIST[USER_CLIENTS] += 1
-                else :
-                    USERS_LIST[USER_CLIENTS] = 1
-            else :
-                USERS_LIST["NO Data"] += 1
-        TEXT = ""
-        for KEY , VAULE in USERS_LIST.items() :
-            TEXT += f"<b>{KEY} :</b> <code>{VAULE}</code>\n"
-    else :
-        TEXT = f"<b>❌ I can't check users.</b>\n<pre>{str(RESPONCE.text)}</pre>"
-    return TEXT
+def recent(value, seconds, now=None):
+    stamp = utc_datetime(value)
+    return stamp is not None and 0 <= ((now or datetime.now(timezone.utc)) - stamp).total_seconds() <= seconds
+
+
+def display_date(value):
+    stamp = utc_datetime(value)
+    return stamp.strftime("%Y-%m-%d %H:%M UTC") if stamp else "—"
+
+
+def user_text(user, update=None):
+    limit = user.get("data_limit")
+    limit_text = f"{limit / 1024**3:.3f} GB" if limit else "unlimited"
+    lines = [
+        f"<b>{escape(user['username'])}</b> · {escape(user['status'])}",
+        f"Traffic: {(user.get('used_traffic') or 0) / 1024**3:.3f} GB / {limit_text}",
+        "Groups: " + escape(", ".join(map(str, user.get("group_ids") or [])) or "—"),
+    ]
+    if user["status"] == "on_hold":
+        lines.append(f"Validity after first connection: {(user.get('on_hold_expire_duration') or 0) / 86400:g} days")
+    else:
+        lines.append("Expires: " + (display_date(user["expire"]) if user.get("expire") else "unlimited"))
+    lines.append("Last online: " + display_date(user.get("online_at")))
+    lines.append("Last subscription update: " + display_date(update.get("created_at") if update else None))
+    lines.append("App: " + escape(((update.get("user_agent") if update else None) or "—")[:300]))
+    return "\n".join(lines)
+
+
+def summary(api):
+    users = api.users()
+    statuses = Counter(user["status"] for user in users)
+    lines = [f"<b>Users: {len(users)}</b>"]
+    lines += [f"{status}: {statuses[status]}" for status in ("active", "on_hold", "disabled", "expired", "limited")]
+    online = sum(recent(user.get("online_at"), 86400) for user in users)
+    lines.append(f"Online within 24h: {online}")
+    lines.append(f"Offline / never connected within 24h: {len(users) - online}")
+    return "\n".join(lines)
+
+
+def find_similar(api, text):
+    names = [user["username"] for user in api.users()]
+    names.sort(
+        key=lambda name: (text.lower() in name.lower(), SequenceMatcher(None, text.lower(), name.lower()).ratio()),
+        reverse=True,
+    )
+    return [
+        name
+        for name in names
+        if text.lower() in name.lower() or SequenceMatcher(None, text.lower(), name.lower()).ratio() > 0.55
+    ][:40]
+
+
+def time_report(api, category, seconds):
+    yes, no = [], []
+    for user in api.users():
+        if category == "subscription":
+            update = api.last_subscription_update(user["id"])
+            value = update["created_at"] if update else None
+        else:
+            value = user.get("online_at")
+        (yes if recent(value, seconds) else no).append(user["username"])
+    return sorted(yes), sorted(no)
+
+
+def pdf_report(names):
+    output = BytesIO()
+    output.name = "pg-toolbox-users.pdf"
+    rows = [[str(index), name] for index, name in enumerate(names, 1)]
+    table = Table([["#", "Username"], *rows], colWidths=[45, 450], repeatRows=1)
+    table.setStyle(TableStyle([("GRID", (0, 0), (-1, -1), 0.3, "grey"), ("VALIGN", (0, 0), (-1, -1), "TOP")]))
+    SimpleDocTemplate(output, pagesize=A4).build([table])
+    output.seek(0)
+    return output
