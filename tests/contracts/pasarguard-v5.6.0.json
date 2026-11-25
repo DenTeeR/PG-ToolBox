@@ -1,0 +1,1110 @@
+{
+  "source": "https://github.com/PasarGuard/panel",
+  "tag": "v5.6.0",
+  "commit": "2b75db15cb0019a00252c59f9d1c34e6082a121f",
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/api/admin"
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin"
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin-role"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/admin-role/{role_id}"
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin-role/{role_id}"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/admin-role/{role_id}"
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin-roles"
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin-roles/simple"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/admin/by-id/{admin_id}"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/admin/by-id/{admin_id}"
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/by-id/{admin_id}/reset"
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/by-id/{admin_id}/usage"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/admin/by-id/{admin_id}/users"
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/by-id/{admin_id}/users/activate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/by-id/{admin_id}/users/disable"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/admin/by-username/{username}"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/admin/by-username/{username}"
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/by-username/{username}/reset"
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/by-username/{username}/usage"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/admin/by-username/{username}/users"
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/by-username/{username}/users/activate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/by-username/{username}/users/disable"
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/miniapp/token"
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/passkey"
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/passkey/admins/{admin_id}"
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/passkey/admins/{admin_id}/register/options"
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/passkey/admins/{admin_id}/register/verify"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/admin/passkey/admins/{admin_id}/{passkey_id}"
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/passkey/login/options"
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/passkey/login/verify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/passkey/register/options"
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/passkey/register/verify"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/admin/passkey/{passkey_id}"
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/token"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/admin/{username}"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/admin/{username}"
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/{username}/reset"
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/{username}/usage"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/admin/{username}/users"
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/{username}/users/activate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/{username}/users/disable"
+    },
+    {
+      "method": "GET",
+      "path": "/api/admins"
+    },
+    {
+      "method": "POST",
+      "path": "/api/admins/bulk/delete"
+    },
+    {
+      "method": "POST",
+      "path": "/api/admins/bulk/disable"
+    },
+    {
+      "method": "POST",
+      "path": "/api/admins/bulk/enable"
+    },
+    {
+      "method": "POST",
+      "path": "/api/admins/bulk/reset"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/admins/bulk/users"
+    },
+    {
+      "method": "POST",
+      "path": "/api/admins/bulk/users/activate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/admins/bulk/users/disable"
+    },
+    {
+      "method": "GET",
+      "path": "/api/admins/simple"
+    },
+    {
+      "method": "POST",
+      "path": "/api/api_key"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/api_key/{key_id}"
+    },
+    {
+      "method": "GET",
+      "path": "/api/api_key/{key_id}"
+    },
+    {
+      "method": "POST",
+      "path": "/api/api_key/{key_id}/revoke"
+    },
+    {
+      "method": "GET",
+      "path": "/api/api_keys"
+    },
+    {
+      "method": "POST",
+      "path": "/api/api_keys/bulk/delete"
+    },
+    {
+      "method": "POST",
+      "path": "/api/client_template"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/client_template/{template_id}"
+    },
+    {
+      "method": "GET",
+      "path": "/api/client_template/{template_id}"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/client_template/{template_id}"
+    },
+    {
+      "method": "GET",
+      "path": "/api/client_templates"
+    },
+    {
+      "method": "POST",
+      "path": "/api/client_templates/bulk/delete"
+    },
+    {
+      "method": "GET",
+      "path": "/api/client_templates/simple"
+    },
+    {
+      "method": "POST",
+      "path": "/api/core"
+    },
+    {
+      "method": "POST",
+      "path": "/api/core/reality-scan"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/core/{core_id}"
+    },
+    {
+      "method": "GET",
+      "path": "/api/core/{core_id}"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/core/{core_id}"
+    },
+    {
+      "method": "POST",
+      "path": "/api/core/{core_id}/restart"
+    },
+    {
+      "method": "GET",
+      "path": "/api/cores"
+    },
+    {
+      "method": "POST",
+      "path": "/api/cores/bulk/delete"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/cores/order"
+    },
+    {
+      "method": "GET",
+      "path": "/api/cores/simple"
+    },
+    {
+      "method": "POST",
+      "path": "/api/group"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/group/{group_id}"
+    },
+    {
+      "method": "GET",
+      "path": "/api/group/{group_id}"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/group/{group_id}"
+    },
+    {
+      "method": "GET",
+      "path": "/api/groups"
+    },
+    {
+      "method": "POST",
+      "path": "/api/groups/bulk/add"
+    },
+    {
+      "method": "POST",
+      "path": "/api/groups/bulk/delete"
+    },
+    {
+      "method": "POST",
+      "path": "/api/groups/bulk/disable"
+    },
+    {
+      "method": "POST",
+      "path": "/api/groups/bulk/enable"
+    },
+    {
+      "method": "POST",
+      "path": "/api/groups/bulk/remove"
+    },
+    {
+      "method": "GET",
+      "path": "/api/groups/simple"
+    },
+    {
+      "method": "POST",
+      "path": "/api/host/"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/host/{host_id}"
+    },
+    {
+      "method": "GET",
+      "path": "/api/host/{host_id}"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/host/{host_id}"
+    },
+    {
+      "method": "GET",
+      "path": "/api/hosts"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/hosts"
+    },
+    {
+      "method": "POST",
+      "path": "/api/hosts/bulk/delete"
+    },
+    {
+      "method": "POST",
+      "path": "/api/hosts/bulk/disable"
+    },
+    {
+      "method": "POST",
+      "path": "/api/hosts/bulk/enable"
+    },
+    {
+      "method": "GET",
+      "path": "/api/inbounds"
+    },
+    {
+      "method": "GET",
+      "path": "/api/inbounds/details"
+    },
+    {
+      "method": "POST",
+      "path": "/api/node"
+    },
+    {
+      "method": "GET",
+      "path": "/api/node/online_stats/{user_id}/ip"
+    },
+    {
+      "method": "GET",
+      "path": "/api/node/settings"
+    },
+    {
+      "method": "GET",
+      "path": "/api/node/usage"
+    },
+    {
+      "method": "GET",
+      "path": "/api/node/usage/outbounds"
+    },
+    {
+      "method": "GET",
+      "path": "/api/node/user_counts/{metric}"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/node/{node_id}"
+    },
+    {
+      "method": "GET",
+      "path": "/api/node/{node_id}"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/node/{node_id}"
+    },
+    {
+      "method": "POST",
+      "path": "/api/node/{node_id}/core_update"
+    },
+    {
+      "method": "POST",
+      "path": "/api/node/{node_id}/geofiles"
+    },
+    {
+      "method": "GET",
+      "path": "/api/node/{node_id}/logs"
+    },
+    {
+      "method": "GET",
+      "path": "/api/node/{node_id}/online_stats/{user_id}"
+    },
+    {
+      "method": "GET",
+      "path": "/api/node/{node_id}/online_stats/{user_id}/ip"
+    },
+    {
+      "method": "GET",
+      "path": "/api/node/{node_id}/outbounds_latency"
+    },
+    {
+      "method": "GET",
+      "path": "/api/node/{node_id}/realtime_stats"
+    },
+    {
+      "method": "POST",
+      "path": "/api/node/{node_id}/reconnect"
+    },
+    {
+      "method": "POST",
+      "path": "/api/node/{node_id}/reset"
+    },
+    {
+      "method": "GET",
+      "path": "/api/node/{node_id}/stats"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/node/{node_id}/sync"
+    },
+    {
+      "method": "POST",
+      "path": "/api/node/{node_id}/update"
+    },
+    {
+      "method": "GET",
+      "path": "/api/nodes"
+    },
+    {
+      "method": "POST",
+      "path": "/api/nodes/bulk/delete"
+    },
+    {
+      "method": "POST",
+      "path": "/api/nodes/bulk/disable"
+    },
+    {
+      "method": "POST",
+      "path": "/api/nodes/bulk/enable"
+    },
+    {
+      "method": "POST",
+      "path": "/api/nodes/bulk/reconnect"
+    },
+    {
+      "method": "POST",
+      "path": "/api/nodes/bulk/reset"
+    },
+    {
+      "method": "POST",
+      "path": "/api/nodes/bulk/update"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/nodes/clear_usage_data/{table}"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/nodes/order"
+    },
+    {
+      "method": "GET",
+      "path": "/api/nodes/realtime_stats"
+    },
+    {
+      "method": "POST",
+      "path": "/api/nodes/reconnect"
+    },
+    {
+      "method": "GET",
+      "path": "/api/nodes/simple"
+    },
+    {
+      "method": "GET",
+      "path": "/api/settings"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/settings"
+    },
+    {
+      "method": "GET",
+      "path": "/api/settings/general"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/setup/owner"
+    },
+    {
+      "method": "POST",
+      "path": "/api/setup/owner"
+    },
+    {
+      "method": "POST",
+      "path": "/api/setup/owner/upgrade"
+    },
+    {
+      "method": "GET",
+      "path": "/api/system"
+    },
+    {
+      "method": "GET",
+      "path": "/api/system/resources"
+    },
+    {
+      "method": "GET",
+      "path": "/api/system/users"
+    },
+    {
+      "method": "POST",
+      "path": "/api/user"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/user/by-id/{user_id}"
+    },
+    {
+      "method": "GET",
+      "path": "/api/user/by-id/{user_id}"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/user/by-id/{user_id}"
+    },
+    {
+      "method": "POST",
+      "path": "/api/user/by-id/{user_id}/active_next"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/user/by-id/{user_id}/disabled"
+    },
+    {
+      "method": "POST",
+      "path": "/api/user/by-id/{user_id}/reset"
+    },
+    {
+      "method": "POST",
+      "path": "/api/user/by-id/{user_id}/revoke_sub"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/user/by-id/{user_id}/set_owner"
+    },
+    {
+      "method": "GET",
+      "path": "/api/user/by-id/{user_id}/sub_update"
+    },
+    {
+      "method": "GET",
+      "path": "/api/user/by-id/{user_id}/usage"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/user/by-username/{username}"
+    },
+    {
+      "method": "GET",
+      "path": "/api/user/by-username/{username}"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/user/by-username/{username}"
+    },
+    {
+      "method": "POST",
+      "path": "/api/user/by-username/{username}/active_next"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/user/by-username/{username}/disabled"
+    },
+    {
+      "method": "POST",
+      "path": "/api/user/by-username/{username}/reset"
+    },
+    {
+      "method": "POST",
+      "path": "/api/user/by-username/{username}/revoke_sub"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/user/by-username/{username}/set_owner"
+    },
+    {
+      "method": "GET",
+      "path": "/api/user/by-username/{username}/sub_update"
+    },
+    {
+      "method": "GET",
+      "path": "/api/user/by-username/{username}/usage"
+    },
+    {
+      "method": "POST",
+      "path": "/api/user/from_template"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/user/from_template/by-id/{user_id}"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/user/from_template/by-username/{username}"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/user/from_template/{username}"
+    },
+    {
+      "method": "GET",
+      "path": "/api/user/{user_id}/hwids"
+    },
+    {
+      "method": "POST",
+      "path": "/api/user/{user_id}/hwids/reset"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/user/{user_id}/hwids/{hwid}"
+    },
+    {
+      "method": "GET",
+      "path": "/api/user/{user_id}/subscription/{client_type}"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/user/{username}"
+    },
+    {
+      "method": "GET",
+      "path": "/api/user/{username}"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/user/{username}"
+    },
+    {
+      "method": "POST",
+      "path": "/api/user/{username}/active_next"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/user/{username}/disabled"
+    },
+    {
+      "method": "POST",
+      "path": "/api/user/{username}/reset"
+    },
+    {
+      "method": "POST",
+      "path": "/api/user/{username}/revoke_sub"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/user/{username}/set_owner"
+    },
+    {
+      "method": "GET",
+      "path": "/api/user/{username}/sub_update"
+    },
+    {
+      "method": "GET",
+      "path": "/api/user/{username}/usage"
+    },
+    {
+      "method": "POST",
+      "path": "/api/user_template"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/user_template/{template_id}"
+    },
+    {
+      "method": "GET",
+      "path": "/api/user_template/{template_id}"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/user_template/{template_id}"
+    },
+    {
+      "method": "GET",
+      "path": "/api/user_templates"
+    },
+    {
+      "method": "POST",
+      "path": "/api/user_templates/bulk/delete"
+    },
+    {
+      "method": "POST",
+      "path": "/api/user_templates/bulk/disable"
+    },
+    {
+      "method": "POST",
+      "path": "/api/user_templates/bulk/enable"
+    },
+    {
+      "method": "GET",
+      "path": "/api/user_templates/simple"
+    },
+    {
+      "method": "GET",
+      "path": "/api/users"
+    },
+    {
+      "method": "POST",
+      "path": "/api/users/bulk/apply_template"
+    },
+    {
+      "method": "POST",
+      "path": "/api/users/bulk/data_limit"
+    },
+    {
+      "method": "POST",
+      "path": "/api/users/bulk/delete"
+    },
+    {
+      "method": "POST",
+      "path": "/api/users/bulk/disable"
+    },
+    {
+      "method": "POST",
+      "path": "/api/users/bulk/enable"
+    },
+    {
+      "method": "POST",
+      "path": "/api/users/bulk/expire"
+    },
+    {
+      "method": "POST",
+      "path": "/api/users/bulk/from_template"
+    },
+    {
+      "method": "POST",
+      "path": "/api/users/bulk/proxy_settings"
+    },
+    {
+      "method": "POST",
+      "path": "/api/users/bulk/reset"
+    },
+    {
+      "method": "POST",
+      "path": "/api/users/bulk/revoke_sub"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/users/bulk/set_owner"
+    },
+    {
+      "method": "GET",
+      "path": "/api/users/counts/{metric}"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/users/expired"
+    },
+    {
+      "method": "GET",
+      "path": "/api/users/expired"
+    },
+    {
+      "method": "POST",
+      "path": "/api/users/reset"
+    },
+    {
+      "method": "GET",
+      "path": "/api/users/simple"
+    },
+    {
+      "method": "GET",
+      "path": "/api/users/sub_update/chart"
+    },
+    {
+      "method": "GET",
+      "path": "/api/users/usage"
+    },
+    {
+      "method": "GET",
+      "path": "/api/wireguard/subnets"
+    },
+    {
+      "method": "GET",
+      "path": "/api/workers/health"
+    }
+  ],
+  "models": {
+    "Node": {
+      "bases": [
+        "BaseModel"
+      ],
+      "fields": [
+        "name",
+        "address",
+        "port",
+        "api_port",
+        "usage_coefficient",
+        "connection_type",
+        "server_ca",
+        "keep_alive",
+        "core_config_id",
+        "api_key",
+        "data_limit",
+        "data_limit_reset_strategy",
+        "reset_time",
+        "default_timeout",
+        "internal_timeout",
+        "proxy_url"
+      ],
+      "required": [
+        "name",
+        "address",
+        "connection_type",
+        "server_ca",
+        "keep_alive",
+        "core_config_id",
+        "api_key"
+      ]
+    },
+    "NodeCreate": {
+      "bases": [
+        "Node"
+      ],
+      "fields": [],
+      "required": []
+    },
+    "NodeModify": {
+      "bases": [
+        "NodeCreate"
+      ],
+      "fields": [
+        "name",
+        "address",
+        "port",
+        "status",
+        "usage_coefficient",
+        "server_ca",
+        "connection_type",
+        "keep_alive",
+        "core_config_id",
+        "api_key",
+        "data_limit",
+        "data_limit_reset_strategy",
+        "reset_time",
+        "default_timeout",
+        "internal_timeout"
+      ],
+      "required": []
+    },
+    "NodesResponse": {
+      "bases": [
+        "BaseModel"
+      ],
+      "fields": [
+        "nodes",
+        "total"
+      ],
+      "required": [
+        "nodes",
+        "total"
+      ]
+    },
+    "AdminRolesResponse": {
+      "bases": [
+        "BaseModel"
+      ],
+      "fields": [
+        "roles",
+        "total"
+      ],
+      "required": [
+        "roles",
+        "total"
+      ]
+    },
+    "SettingsSchema": {
+      "bases": [
+        "BaseModel"
+      ],
+      "fields": [
+        "telegram",
+        "webhook",
+        "notification_settings",
+        "notification_enable",
+        "subscription",
+        "hwid",
+        "general",
+        "cleanup"
+      ],
+      "required": []
+    },
+    "User": {
+      "bases": [
+        "BaseModel"
+      ],
+      "fields": [
+        "proxy_settings",
+        "expire",
+        "data_limit",
+        "data_limit_reset_strategy",
+        "note",
+        "on_hold_expire_duration",
+        "on_hold_timeout",
+        "group_ids",
+        "auto_delete_in_days",
+        "hwid_limit",
+        "next_plan"
+      ],
+      "required": []
+    },
+    "UserWithValidator": {
+      "bases": [
+        "User"
+      ],
+      "fields": [],
+      "required": []
+    },
+    "UserCreate": {
+      "bases": [
+        "UserWithValidator"
+      ],
+      "fields": [
+        "username",
+        "status"
+      ],
+      "required": [
+        "username"
+      ]
+    },
+    "UserModify": {
+      "bases": [
+        "UserWithValidator"
+      ],
+      "fields": [
+        "status",
+        "proxy_settings",
+        "group_ids"
+      ],
+      "required": []
+    },
+    "UsersResponse": {
+      "bases": [
+        "BaseModel"
+      ],
+      "fields": [
+        "users",
+        "total"
+      ],
+      "required": [
+        "users",
+        "total"
+      ]
+    },
+    "UserSubscriptionUpdateSchema": {
+      "bases": [
+        "BaseModel"
+      ],
+      "fields": [
+        "created_at",
+        "user_agent",
+        "ip",
+        "hwid"
+      ],
+      "required": [
+        "created_at",
+        "user_agent"
+      ]
+    },
+    "UserSubscriptionUpdateList": {
+      "bases": [
+        "BaseModel"
+      ],
+      "fields": [
+        "updates",
+        "count"
+      ],
+      "required": [
+        "count"
+      ]
+    },
+    "UserSubscriptionUpdateChartSegment": {
+      "bases": [
+        "BaseModel"
+      ],
+      "fields": [
+        "name",
+        "count",
+        "percentage"
+      ],
+      "required": [
+        "name",
+        "count",
+        "percentage"
+      ]
+    },
+    "AdminModify": {
+      "bases": [
+        "BaseModel"
+      ],
+      "fields": [
+        "password",
+        "telegram_id",
+        "discord_webhook",
+        "status",
+        "data_limit",
+        "sub_template",
+        "sub_domain",
+        "profile_title",
+        "support_url",
+        "custom_variables",
+        "note",
+        "notification_enable",
+        "role_id",
+        "permission_overrides"
+      ],
+      "required": []
+    },
+    "AdminCreate": {
+      "bases": [
+        "AdminModify"
+      ],
+      "fields": [
+        "username",
+        "password",
+        "role_id"
+      ],
+      "required": [
+        "username",
+        "password",
+        "role_id"
+      ]
+    },
+    "AdminsResponse": {
+      "bases": [
+        "BaseModel"
+      ],
+      "fields": [
+        "admins",
+        "total",
+        "active",
+        "disabled",
+        "limited"
+      ],
+      "required": [
+        "admins",
+        "total",
+        "active",
+        "disabled",
+        "limited"
+      ]
+    },
+    "GroupsResponse": {
+      "bases": [
+        "BaseModel"
+      ],
+      "fields": [
+        "groups",
+        "total"
+      ],
+      "required": [
+        "groups",
+        "total"
+      ]
+    }
+  }
+}

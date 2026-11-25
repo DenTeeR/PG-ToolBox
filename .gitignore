@@ -1,0 +1,14 @@
+.venv/
+hold/
+__pycache__/
+*.pyc
+*.db
+*.db-*
+*.session
+*.session-*
+*.log
+*.pid
+nohup.out
+.env
+.coverage
+.pytest_cache/

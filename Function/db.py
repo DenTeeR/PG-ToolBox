@@ -1,173 +1,174 @@
-import sqlite3 , requests , json
-from requests.packages.urllib3.exceptions import InsecureRequestWarning
-requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+"""Local configuration and conversation state; never mixes panel and bot users."""
 
-def DEF_GET_BOT_TOKEN():
-    conn = sqlite3.connect('holder.db')
-    cursor = conn.cursor()
-    cursor.execute('''SELECT token FROM bot''')
-    second_column_value = cursor.fetchone()[0] 
-    conn.close()
-    return second_column_value
+import json
+import os
+import sqlite3
+from functools import lru_cache
+from contextlib import contextmanager
+from pathlib import Path
 
-def DEF_CHECK_BOSS(CHATID):
-    conn = sqlite3.connect('holder.db')
-    cursor = conn.cursor()
-    cursor.execute("SELECT role FROM users WHERE chatid=?", (CHATID,))
-    USER_STEP = cursor.fetchone()
-    conn.close()
-    if USER_STEP and USER_STEP[0] == "boss":
-        return True
-    else:
-        return False
+from Function.api import PasarGuardClient
 
-def DEF_CHECK_STEP(CHATID) :
-    conn = sqlite3.connect('holder.db')
-    cursor = conn.cursor()
-    cursor.execute("SELECT step FROM users WHERE chatid=?", (CHATID,))
-    USER_STEP = cursor.fetchone()
-    conn.close()
-    return USER_STEP[0]
 
-def DEF_UPDATE_STEP(CHATID,NEW_STEP) :
-    conn = sqlite3.connect('holder.db')
-    cursor = conn.cursor()
-    cursor.execute("UPDATE users SET step=? WHERE chatid=?", (NEW_STEP, CHATID,))
-    conn.commit()
-    conn.close()
+def db_path():
+    return Path(os.environ.get("PG_DB", Path(__file__).resolve().parents[1] / "holder.db"))
 
-def DEF_IMPORT_DATA (CHATID) :
-    conn = sqlite3.connect('holder.db')
-    cursor = conn.cursor()
-    cursor.execute("SELECT username, password, domain FROM users WHERE chatid=?", (CHATID,))
-    USER_INFO = cursor.fetchone()
-    conn.close()
-    return USER_INFO
 
-def DEF_PANEL_ACCESS(PANEL_USER, PANEL_PASS, PANEL_DOMAIN) :
-    PANEL_TOKEN_DATA = {"username" : PANEL_USER , "password" : PANEL_PASS }
-    PANEL_TOKEN = requests.post(url=f"{PANEL_DOMAIN}/api/admin/token" , data=PANEL_TOKEN_DATA , verify=False)
-    if PANEL_TOKEN.status_code == 200 :
-        PANEL_TOKEN_BACK = json.loads(PANEL_TOKEN.text)
-        PANEL_HEADERS = {
-                    'accept': 'application/json',
-                    'Content-Type': 'application/json',
-                    'Authorization': f"Bearer {PANEL_TOKEN_BACK.get('access_token')}"}
-        return PANEL_HEADERS
-    else :
-        return False
-
-def DEF_MONITORING_DATA():
-    conn = sqlite3.connect('holder.db')
-    cursor = conn.cursor()
-    cursor.execute('''SELECT * FROM monitoring''')
-    USER_DATA = cursor.fetchone()
-    conn.close()
-    return USER_DATA
-
-def DEF_CHANGE_NODE_STATUS(CHATID , STATUS) :
-    conn = sqlite3.connect('holder.db')
-    cursor = conn.cursor()
-    cursor.execute("UPDATE monitoring SET status = ? WHERE chatid = ?", (STATUS, CHATID))
-    conn.commit()
-    conn.close()
-
-def DEF_NODE_STATUS(CHATID , ROW , STATUS) :
-    conn = sqlite3.connect('holder.db')
-    cursor = conn.cursor()
-    cursor.execute(f"UPDATE monitoring SET {ROW} = ? WHERE chatid = ?", (STATUS, CHATID))
-    conn.commit()
-    conn.close()
-
-def DEF_TEMPLATES_DATA():
-    conn = sqlite3.connect('holder.db')
-    cursor = conn.cursor()
-    cursor.execute("SELECT name, data, date FROM templates")
-    USER_DATA = cursor.fetchall()
-    conn.close()
-    return USER_DATA
-    
-def DEF_TEMPLATES_DELETE(TEM_NAME) :
-    conn = sqlite3.connect('holder.db')
-    cursor = conn.cursor()
-    cursor.execute("DELETE FROM templates WHERE name = ?", (TEM_NAME,))
-    conn.commit()
-    conn.close()
-
-def DEF_TEMPLATES_ADD(NAME, DATA, DATE, PROXIES, INBOUNDS):
-    conn = sqlite3.connect('holder.db')
-    cursor = conn.cursor()
-    cursor.execute("INSERT INTO templates (name, data, date, proxies, inbounds) VALUES (?, ?, ?, ?, ?)",
-                   (NAME, DATA, DATE, json.dumps(PROXIES), json.dumps(INBOUNDS)))
-    conn.commit()
-    conn.close()
-
-def DEF_CHECK_TEMPLATES_NAME(TEXT):
-    conn = sqlite3.connect('holder.db')
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM templates WHERE name = ?", (TEXT,))
-    result = cursor.fetchone()    
-    conn.close()
-    return result is not None
-
-def DEF_TEMPLATES_DATA_ALL(TEXT):
-    conn = sqlite3.connect('holder.db')
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM templates WHERE name = ?", (TEXT,))
-    result = cursor.fetchone()    
-    conn.close()
-    return result
-
-def DEF_MESSAGER_IMPORT_DATA():
-    conn = sqlite3.connect('holder.db')
-    cursor = conn.cursor()
-    cursor.execute('''SELECT * FROM messages''')
-    USER_DATA = cursor.fetchone()
-    conn.close()
-    return USER_DATA
-
-def DEF_GET_MESSAGE_STATUS(CHATID):
-    conn = sqlite3.connect('holder.db')
-    cursor = conn.cursor()
-    cursor.execute('''SELECT status FROM messages WHERE chatid = ?''', (CHATID,))
-    USER_DATA = cursor.fetchone()
-    conn.close()
-    if USER_DATA:
-        return USER_DATA[0]
-    else:
-        return None
-
-def DEF_CHANGE_MESSAGER_STATUS(CHATID):
-    OLD_STATUS = DEF_GET_MESSAGE_STATUS(CHATID)
-    conn = sqlite3.connect('holder.db')
-    cursor = conn.cursor()
-    if OLD_STATUS == "on" :    
-        cursor.execute('''UPDATE messages SET status = ? WHERE chatid = ?''', ("off", CHATID))
-        conn.commit()
+@contextmanager
+def connect():
+    conn = sqlite3.connect(db_path(), timeout=20)
+    conn.row_factory = sqlite3.Row
+    try:
+        with conn:
+            yield conn
+    finally:
         conn.close()
-        TEXT = "<b>✅ Your status is off.</b>"
-    else :
-        PANEL_USER, PANEL_PASS, PANEL_DOMAIN = DEF_IMPORT_DATA (CHATID)
-        PANEL_TOKEN = DEF_PANEL_ACCESS(PANEL_USER, PANEL_PASS, PANEL_DOMAIN)
-        URL = f"{PANEL_DOMAIN}/api/inbounds"
-        RESPONCE = requests.get(url=URL, headers=PANEL_TOKEN , verify=False )
-        if RESPONCE.status_code == 200:
-            INBOUNDS = json.loads(RESPONCE.text)
-            FOUND = False
-            if "trojan" in INBOUNDS :
-                for ITEM in INBOUNDS["trojan"]:
-                    if "Holderbot" in ITEM["tag"]:
-                        FOUND = True
-                        break
-            else :
-                FOUND = False
-            if FOUND :
-                cursor.execute('''UPDATE messages SET status = ? WHERE chatid = ?''', ("on", CHATID))
-                conn.commit()
-                conn.close()
-                TEXT = "<b>✅ Your status is on.</b>"
-            else :
-                TEXT = "<b>❌ Your status is not change.\nyou don't have Holderbot inbounds!</b>"
-        else :
-            TEXT = "<b>❌ i can't check inbounds!</b>"
-    return TEXT
+
+
+def initialize():
+    with connect() as conn:
+        conn.executescript("""
+        CREATE TABLE IF NOT EXISTS bot (chatid INTEGER PRIMARY KEY, token TEXT);
+        CREATE TABLE IF NOT EXISTS users (chatid INTEGER PRIMARY KEY, role TEXT, name TEXT,
+            username TEXT, password TEXT, domain TEXT, step TEXT, api_key TEXT DEFAULT '', backend TEXT DEFAULT 'unconfigured');
+        CREATE TABLE IF NOT EXISTS monitoring (chatid INTEGER PRIMARY KEY, status TEXT,
+            check_normal INTEGER, check_error INTEGER);
+        CREATE TABLE IF NOT EXISTS messages (chatid INTEGER PRIMARY KEY, status TEXT);
+        CREATE TABLE IF NOT EXISTS pg_templates (name TEXT PRIMARY KEY, data TEXT,
+            days INTEGER, group_ids TEXT);
+        CREATE TABLE IF NOT EXISTS alert_state (chatid INTEGER, user_id INTEGER, status TEXT,
+            PRIMARY KEY (chatid, user_id));
+        """)
+        if "api_key" not in {r[1] for r in conn.execute("PRAGMA table_info(users)")}:
+            conn.execute("ALTER TABLE users ADD COLUMN api_key TEXT DEFAULT ''")
+        if "backend" not in {r[1] for r in conn.execute("PRAGMA table_info(users)")}:
+            conn.execute("ALTER TABLE users ADD COLUMN backend TEXT DEFAULT 'unconfigured'")
+        if conn.execute("PRAGMA user_version").fetchone()[0] < 1:
+            conn.execute("UPDATE users SET step='None'")
+            # Old notice switches enabled destructive inbound rewriting. New
+            # alerts require a fresh baseline and explicit activation in the UI.
+            conn.execute("UPDATE messages SET status='off'")
+            conn.execute("PRAGMA user_version=1")
+    os.chmod(db_path(), 0o600)
+
+
+def config(chatid=None):
+    with connect() as conn:
+        if chatid is None:
+            row = conn.execute("SELECT * FROM users WHERE role='boss' LIMIT 1").fetchone()
+        else:
+            row = conn.execute("SELECT * FROM users WHERE chatid=? AND role='boss'", (chatid,)).fetchone()
+        if not row or row["backend"] != "pasarguard":
+            raise ValueError("Run setup.py to configure PG-ToolBox for PasarGuard.")
+        return dict(row)
+
+
+def authorized(chatid):
+    with connect() as conn:
+        return (
+            conn.execute(
+                "SELECT 1 FROM users WHERE chatid=? AND role='boss' AND backend='pasarguard'", (chatid,)
+            ).fetchone()
+            is not None
+        )
+
+
+@lru_cache(maxsize=16)
+def _client(url, user, password, key):
+    return PasarGuardClient(url, user, password, key)
+
+
+def client_for(chatid=None):
+    info = config(chatid)
+    return _client(info["domain"], info["username"], info["password"], info["api_key"] or "")
+
+
+def bot_token():
+    with connect() as conn:
+        row = conn.execute("SELECT token FROM bot LIMIT 1").fetchone()
+        if not row:
+            raise ValueError("Run setup.py first.")
+        return row[0]
+
+
+def state(chatid):
+    with connect() as conn:
+        row = conn.execute("SELECT step FROM users WHERE chatid=?", (chatid,)).fetchone()
+    try:
+        value = json.loads(row[0]) if row else {}
+        return value if isinstance(value, dict) else {}
+    except (ValueError, TypeError):
+        return {}
+
+
+def set_state(chatid, value=None):
+    with connect() as conn:
+        conn.execute("UPDATE users SET step=? WHERE chatid=?", (json.dumps(value or {}), chatid))
+
+
+def templates():
+    with connect() as conn:
+        rows = conn.execute("SELECT * FROM pg_templates ORDER BY name").fetchall()
+    return [{**dict(row), "group_ids": json.loads(row["group_ids"])} for row in rows]
+
+
+def save_template(name, gb, days, groups):
+    with connect() as conn:
+        conn.execute("INSERT INTO pg_templates VALUES (?, ?, ?, ?)", (name, gb, days, json.dumps(groups)))
+
+
+def delete_template(name):
+    with connect() as conn:
+        conn.execute("DELETE FROM pg_templates WHERE name=?", (name,))
+
+
+def monitoring(chatid):
+    with connect() as conn:
+        return dict(conn.execute("SELECT * FROM monitoring WHERE chatid=?", (chatid,)).fetchone())
+
+
+def set_monitoring(chatid, **fields):
+    if not fields or not set(fields) <= {"status", "check_normal", "check_error"}:
+        raise ValueError("Invalid monitoring setting.")
+    with connect() as conn:
+        for key, value in fields.items():
+            conn.execute(f"UPDATE monitoring SET {key}=? WHERE chatid=?", (value, chatid))
+
+
+def alerts_enabled(chatid):
+    with connect() as conn:
+        row = conn.execute("SELECT status FROM messages WHERE chatid=?", (chatid,)).fetchone()
+        return bool(row and row[0] == "on")
+
+
+def toggle_alerts(chatid):
+    enabled = alerts_enabled(chatid)
+    users = client_for(chatid).users() if not enabled else []
+    with connect() as conn:
+        if not enabled:
+            conn.execute("DELETE FROM alert_state WHERE chatid=?", (chatid,))
+            conn.executemany(
+                "INSERT INTO alert_state VALUES (?, ?, ?)", [(chatid, user["id"], user["status"]) for user in users]
+            )
+        conn.execute("UPDATE messages SET status=? WHERE chatid=?", ("off" if enabled else "on", chatid))
+    return not enabled
+
+
+def alert_status(chatid, user_id):
+    with connect() as conn:
+        row = conn.execute("SELECT status FROM alert_state WHERE chatid=? AND user_id=?", (chatid, user_id)).fetchone()
+        return row[0] if row else None
+
+
+def record_status(chatid, user_id, status):
+    with connect() as conn:
+        conn.execute("INSERT OR REPLACE INTO alert_state VALUES (?, ?, ?)", (chatid, user_id, status))
+
+
+def update_login_password(chatid, admin_name, password):
+    """Keep password-based bot authentication usable after changing its own login."""
+    info = config(chatid)
+    if not info["api_key"] and info["username"] == admin_name:
+        with connect() as conn:
+            conn.execute("UPDATE users SET password=? WHERE chatid=?", (password, chatid))
+        _client.cache_clear()
