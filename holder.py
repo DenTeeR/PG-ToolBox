@@ -11,11 +11,11 @@ from pyrogram import enums, filters, idle
 from pyrogram.errors import MessageNotModified, RPCError
 
 from Function import db
-from Function.api import PanelError, SUPPORTED_PANEL, create_payload, duration_seconds, traffic_bytes, username
+from Function.api import PanelError, SUPPORTED_PANEL, canonical_traffic, create_payload, duration_seconds, username
 from Function.keyboards import CANCEL, HOME, TIMES, USERS, group_keyboard, inline, paged
 from Function.qr import DEF_CREATE_QRCODE
-from Function.telegram import make_client
-from Function.users import find_similar, pdf_report, summary, time_report, user_text
+from Function.telegram import answer_callback, make_client, telegram_call
+from Function.users import find_similar, group_summary, pdf_report, summary, time_report, user_text
 from monitoring import check_nodes
 from notices import pending_notices
 
@@ -34,8 +34,13 @@ async def panel(chatid, method, *args, **kwargs):
 
 
 async def say(app, chatid, text, keyboard=None):
-    return await app.send_message(
-        chatid, text, reply_markup=keyboard, parse_mode=enums.ParseMode.HTML, disable_web_page_preview=True
+    return await telegram_call(
+        app.send_message,
+        chatid,
+        text,
+        reply_markup=keyboard,
+        parse_mode=enums.ParseMode.HTML,
+        disable_web_page_preview=True,
     )
 
 
@@ -45,7 +50,7 @@ async def send_pdf(app, chatid, names, title):
         return
     document = await asyncio.to_thread(pdf_report, names)
     try:
-        await app.send_document(chatid, document, caption=f"{title}: {len(names)} users")
+        await telegram_call(app.send_document, chatid, document, caption=f"{title}: {len(names)} users")
     finally:
         document.close()
 
@@ -130,10 +135,12 @@ async def create_batch(app, chatid, context):
             if url:
                 qr = await asyncio.to_thread(DEF_CREATE_QRCODE, url)
                 try:
-                    await app.send_photo(chatid, qr)
+                    await telegram_call(app.send_photo, chatid, qr)
                 finally:
                     qr.close()
-                await app.send_message(chatid, url, parse_mode=enums.ParseMode.DISABLED, disable_web_page_preview=True)
+                await telegram_call(
+                    app.send_message, chatid, url, parse_mode=enums.ParseMode.DISABLED, disable_web_page_preview=True
+                )
     finally:
         db.set_state(chatid)
         await say(
@@ -341,7 +348,7 @@ async def process_message(app, message, text):
         elif mode == "qr":
             qr = await asyncio.to_thread(DEF_CREATE_QRCODE, text)
             try:
-                await app.send_photo(chatid, qr)
+                await telegram_call(app.send_photo, chatid, qr)
             finally:
                 qr.close()
             db.set_state(chatid)
@@ -363,8 +370,7 @@ async def process_message(app, message, text):
                 CANCEL,
             )
         elif mode == "gb":
-            traffic_bytes(text)
-            context.update(gb=text, mode="days")
+            context.update(gb=canonical_traffic(text), mode="days")
             db.set_state(chatid, context)
             await say(app, chatid, "Validity in whole days from first connection (0 = unlimited)?", CANCEL)
         elif mode == "days":
@@ -436,7 +442,7 @@ async def confirm_creation(app, chatid, context):
         chatid,
         "create",
         f"Create {context['count']} user(s), {context['gb']} GB, {context['days']} days, "
-        f"groups {escape(str(context['groups']))}?",
+        f"groups {escape(group_summary(context['groups']))}?",
         **context,
     )
 
@@ -448,11 +454,11 @@ async def handle_callback(app, query):
         or query.message.chat.id != query.from_user.id
         or not db.authorized(query.from_user.id)
     ):
-        await query.answer("Access denied.", show_alert=True)
+        await answer_callback(query, "Access denied.", show_alert=True)
         return
     chatid = query.from_user.id
     try:
-        await query.answer()
+        await answer_callback(query)
         await process_callback(app, chatid, query.data.split("|"), query)
     except MessageNotModified:
         pass
@@ -483,11 +489,11 @@ async def process_callback(app, chatid, data, query):
             groups.symmetric_difference_update({group_id})
             context["groups"] = sorted(groups)
             db.set_state(chatid, context)
-            await query.edit_message_reply_markup(group_keyboard(context, context.get("page", 0)))
+            await telegram_call(query.edit_message_reply_markup, group_keyboard(context, context.get("page", 0)))
         elif command == "gp":
             context["page"] = int(data[2])
             db.set_state(chatid, context)
-            await query.edit_message_reply_markup(group_keyboard(context, context["page"]))
+            await telegram_call(query.edit_message_reply_markup, group_keyboard(context, context["page"]))
         elif command == "gs":
             if not context["groups"]:
                 raise ValueError("Select at least one group.")
@@ -596,10 +602,12 @@ async def process_callback(app, chatid, data, query):
                 raise ValueError("The panel did not return a subscription URL.")
             qr = await asyncio.to_thread(DEF_CREATE_QRCODE, url)
             try:
-                await app.send_photo(chatid, qr)
+                await telegram_call(app.send_photo, chatid, qr)
             finally:
                 qr.close()
-            await app.send_message(chatid, url, parse_mode=enums.ParseMode.DISABLED, disable_web_page_preview=True)
+            await telegram_call(
+                app.send_message, chatid, url, parse_mode=enums.ParseMode.DISABLED, disable_web_page_preview=True
+            )
     elif command == "mtoggle":
         db.set_monitoring(chatid, status="off" if db.monitoring(chatid)["status"] == "on" else "on")
         await show_monitoring(app, chatid)

@@ -4,6 +4,7 @@ import getpass
 import os
 import sqlite3
 from datetime import datetime, timezone
+from contextlib import closing
 
 from Function import db
 from Function.api import PasarGuardClient, PanelError, panel_url
@@ -47,9 +48,14 @@ def main():
     path = db.db_path()
     if path.exists():
         backup = path.with_name(f"{path.stem}.backup-{datetime.now(timezone.utc):%Y%m%d%H%M%S%f}.db")
-        with sqlite3.connect(path) as source, sqlite3.connect(backup) as destination:
-            source.backup(destination)
-        os.chmod(backup, 0o600)
+        descriptor = os.open(backup, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
+        os.close(descriptor)
+        try:
+            with closing(sqlite3.connect(path)) as source, closing(sqlite3.connect(backup)) as destination:
+                source.backup(destination)
+        except BaseException:
+            backup.unlink(missing_ok=True)
+            raise
         print(f"Previous database backed up to {backup.name}.")
     save_config(int(raw_chatid), token, url, admin_name, password, api_key)
     print("Saved. Start the service, open your Telegram bot and send /start.")
