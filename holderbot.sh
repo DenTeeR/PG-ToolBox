@@ -14,9 +14,17 @@ if [[ ! $install_dir =~ ^/[A-Za-z0-9_./-]+$ || $install_dir == / ]]; then
     echo "PG_INSTALL_DIR must be an absolute directory path without spaces."
     exit 1
 fi
+install_dir=$(realpath -m -- "$install_dir")
+case "$install_dir" in
+    /|/root|/root/*|/home|/home/*|/run/user|/run/user/*)
+        echo "Choose an installation directory outside /root, /home and /run/user (for example /opt/pg-toolbox)."
+        exit 1
+        ;;
+esac
 command -v systemctl >/dev/null || { echo "A systemd-based Debian/Ubuntu server is required."; exit 1; }
 apt-get update
 apt-get install -y python3 python3-venv git ca-certificates
+"$python_bin" -c 'import sys; sys.exit(0 if (3, 10) <= sys.version_info[:2] <= (3, 12) else "Use Python 3.10–3.12; set PG_PYTHON to its executable.")'
 
 if [[ -d $install_dir/.git ]]; then
     if [[ -n $(git -c safe.directory="$install_dir" -C "$install_dir" status --porcelain) ]]; then
@@ -34,7 +42,6 @@ fi
 if systemctl cat pg-toolbox.service >/dev/null 2>&1; then
     systemctl stop pg-toolbox.service
 fi
-"$python_bin" -c 'import sys; sys.exit(0 if (3, 10) <= sys.version_info[:2] <= (3, 12) else "Use Python 3.10–3.12; set PG_PYTHON to its executable.")'
 "$python_bin" -m venv "$install_dir/.venv"
 "$install_dir/.venv/bin/pip" install -r "$install_dir/requirements.txt"
 cd "$install_dir"

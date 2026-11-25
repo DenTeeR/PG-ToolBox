@@ -31,13 +31,21 @@ def display_date(value):
     return stamp.strftime("%Y-%m-%d %H:%M UTC") if stamp else "—"
 
 
+def group_summary(group_ids):
+    groups = group_ids or []
+    text = ", ".join(map(str, groups[:20])) or "—"
+    if len(groups) > 20:
+        text += f" … ({len(groups)} groups total)"
+    return text
+
+
 def user_text(user, update=None):
     limit = user.get("data_limit")
     limit_text = f"{limit / 1024**3:.3f} GB" if limit else "unlimited"
     lines = [
         f"<b>{escape(user['username'])}</b> · {escape(user['status'])}",
         f"Traffic: {(user.get('used_traffic') or 0) / 1024**3:.3f} GB / {limit_text}",
-        "Groups: " + escape(", ".join(map(str, user.get("group_ids") or [])) or "—"),
+        "Groups: " + escape(group_summary(user.get("group_ids"))),
     ]
     if user["status"] == "on_hold":
         lines.append(f"Validity after first connection: {(user.get('on_hold_expire_duration') or 0) / 86400:g} days")

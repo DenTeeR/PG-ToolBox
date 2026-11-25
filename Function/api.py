@@ -7,13 +7,14 @@ validation bodies (which can contain passwords and proxy credentials).
 import os
 import re
 import threading
-from decimal import Decimal, InvalidOperation
+from decimal import Decimal, InvalidOperation, localcontext
 from urllib.parse import quote, urlsplit
 
 import requests
 
 SUPPORTED_PANEL = "5.6.0"
 MAX_DURATION = 2_147_483_647  # app/models/validators.py
+MAX_TRAFFIC = 2**63 - 1  # app/db/models.py: signed BigInteger data_limit
 
 
 class PanelError(Exception):
@@ -48,9 +49,23 @@ def traffic_bytes(value):
         amount = Decimal(str(value))
         if not amount.is_finite() or amount < 0:
             raise ValueError("Traffic must be a nonnegative number of GB; 0 means unlimited.")
-        return int(amount * 1024**3)
+        with localcontext() as context:
+            context.prec = max(60, len(amount.as_tuple().digits) + 12)
+            if amount > Decimal(MAX_TRAFFIC) / 1024**3:
+                raise ValueError("Traffic exceeds the maximum supported by PasarGuard's database.")
+            result = int(amount * 1024**3)
+        if amount and result == 0:
+            raise ValueError("A positive traffic limit must be at least one byte; use 0 only for unlimited traffic.")
+        return result
     except (InvalidOperation, OverflowError):
         raise ValueError("Enter a valid traffic limit in GB.") from None
+
+
+def canonical_traffic(value):
+    with localcontext() as context:
+        context.prec = 60
+        text = format(Decimal(traffic_bytes(value)) / 1024**3, "f")
+    return text.rstrip("0").rstrip(".") if "." in text else text
 
 
 def duration_seconds(days):
